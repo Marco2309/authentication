@@ -7,26 +7,24 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 module.exports = {
   up: function () {
     var _up = _asyncToGenerator(function* (queryInterface, Sequelize) {
-      yield queryInterface.createTable('Recargas', {
+      yield queryInterface.createTable('Users', {
         id: {
           allowNull: false,
           autoIncrement: true,
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        idTarjeta: {
-          type: Sequelize.INTEGER,
-          references: {
-            model: 'Tarjeta',
-            key: 'id'
-          }
+        firstName: {
+          type: Sequelize.STRING
         },
-        fecha: {
-          type: Sequelize.DATE,
-          defaultValue: Sequelize.NOW
+        lastName: {
+          type: Sequelize.STRING
         },
-        valorRecarga: {
-          type: Sequelize.NUMERIC
+        email: {
+          type: Sequelize.STRING
+        },
+        password: {
+          type: Sequelize.STRING
         },
         createdAt: {
           allowNull: false,
@@ -47,7 +45,7 @@ module.exports = {
   }(),
   down: function () {
     var _down = _asyncToGenerator(function* (queryInterface, Sequelize) {
-      yield queryInterface.dropTable('Recargas');
+      yield queryInterface.dropTable('Users');
     });
 
     function down(_x3, _x4) {
