@@ -15,41 +15,62 @@ export const login = async (req, res) => {
     const valid = bcryptjs.compareSync(password, user.password);
     if (user && valid) {
       const token = generateJWT(user);
-      return success(req, res, 200, {
+      return res.status(200).json({
         message: "Has iniciado sesión correctamente",
         token
-      });
+      })
     }
     return error(req, res, 'Credenciales incorrectas', 401, "Las credenciales son incorrectas")
   } catch (e) { error(req, res, e, 400) }
 }
 
-export const signIn = (req, res) => {
-  const pass = req.body.password;
-  bcryptjs.genSalt(10, (err, salt) => {
-    if (err) {
-      console.log('Err en genSalt', err);
-      return !1
-    }
-    return bcryptjs.hash(pass, salt, (err, hash) => {
+export const signIn = async (req, res) => {
+  const { email, password, firstName, lastName } = req.body;
+  const user = await Users.findOne({ where: { email: email } });
+  let thereIsUser = false
+  let thereIsemail = false
+  let thereIspassword = false
+  let thereIsfirstName = false
+  let thereIslastName = false
+
+  user ? thereIsUser = false : thereIsUser = true
+  email ? thereIsemail = true : thereIsemail = false
+  password ? thereIspassword = true : thereIspassword = false
+  firstName ? thereIsfirstName = true : thereIsfirstName = false
+  lastName ? thereIslastName = true : thereIslastName = false
+
+  if (thereIsUser && thereIsemail && thereIspassword && thereIsfirstName && thereIslastName) {
+    bcryptjs.genSalt(10, (err, salt) => {
       if (err) {
-        console.log('Err en hash', err);
+        console.log('Err en genSalt', err);
         return !1
       }
-      req.body.password = hash;
-      Users.create(req.body)
-        .then(userCreated => success(req, res, 201, userCreated))
-        .catch(e => error(req, res, e, 400))
-      return !0
+      return bcryptjs.hash(password, salt, (err, hash) => {
+        if (err) {
+          console.log('Err en hash', err);
+          return !1
+        }
+        req.body.password = hash;
+        Users.create(req.body)
+          .then(userCreated => res.status(201).json(userCreated))
+          .catch(e => error(req, res, e, 400))
+        return !0
+      })
     })
-  })
+  } else {
+    if (user) {
+      error(req, res, 'This user already exists in the database', 400, 'This email has already been registered')
+    } else {
+      error(req, res, 'missing data', 400, 'missing data')
+    }
+  }
 }
 
 export const users = (req, res) => {
   const decoded = validateJWT(req, res)
   if (decoded) {
     Users.findAll()
-      .then(users => success(req, res, 201, users))
+      .then(users => res.status(200).json(users))
       .catch(e => error(req, res, e, 401))
   } else {
     console.log('[response error] => No decode in users');
@@ -61,7 +82,7 @@ export const user = (req, res) => {
   const decoded = validateJWT(req, res)
   if (Number(id) === decoded.id) {
     Users.findByPk(id)
-      .then(user => success(req, res, 201, user))
+      .then(user => res.status(200).json(user))
       .catch(e => error(req, res, e, 401))
   } else {
     console.log('[response error] => No decode in user');

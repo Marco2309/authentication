@@ -15,10 +15,13 @@ export const generateJWT = (user) => {
 
 //Validar el token 
 export const validateJWT = (req, res) => {
-  const token = req.headers['x-access-token']
-  if (!token) {
-    error(req, res, 'no toquen', 401, 'No token provided')
+  const bearerToken = req.headers['authorization']
+  if (!bearerToken) {
+    error(req, res, 'no toquen', 403, 'No token provided')
   }
+  console.log('bearerToken', bearerToken);
+  const token = bearerToken.split(' ')[1]
+  console.log('token', token);
   const decoded = jwt.verify(token, process.env.SECRET_KEY, (err, decodif) => {
     if (err) {
       error(req, res, err, 401, 'in jwt')
